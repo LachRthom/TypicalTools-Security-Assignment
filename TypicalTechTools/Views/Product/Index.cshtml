@@ -1,0 +1,56 @@
+﻿@model IEnumerable<TypicalTechTools.Models.Product>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1>Products</h1>
+</div>
+
+@{
+    //Grab the auth status to use for UI display toggles and the role to split privledges by role
+    bool isAuthenticated = Context.User.Identity.IsAuthenticated;
+    bool isRequiredRole = Context.User.IsInRole("ADMIN");
+}
+
+@if (isAuthenticated)
+{
+    <div class="text-center">
+        <a asp-action="Create" class="btn btn-primary">Create Product</a>
+    </div>
+}
+
+<div class="card-container row">
+    @foreach (var product in Model)
+    {
+        <div class="single-card card shadow m-2 text-center" style="width: 18rem; height:20rem">
+            <h2>@product.ProductName</h2>
+            <h3>$@product.ProductPrice</h3>
+            <p style="height:12rem">@product.ProductDescription</p>
+            <small>
+                Updated:
+                @if (product.UpdatedDate.HasValue)
+                {
+                    @product.UpdatedDate.Value.ToString("MMMM dd, yyyy")
+                }
+                else
+                {
+                    @:Not available
+                }
+                <br />
+                Product Code: @product.ProductId
+            </small>
+            @if (isAuthenticated && isRequiredRole)
+            {
+                <div>
+                    <a asp-action="Edit" asp-route-id="@product.ProductId" class="btn btn-primary m-2">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@product.ProductId" class="btn btn-danger m-2">Delete</a>
+                </div>
+            }
+            <div>
+                <a asp-action="Details" asp-route-id="@product.ProductId" class="btn btn-primary m-2">Details</a>
+                @Html.ActionLink("Comments", "CommentList", "Comment", new { id = product.ProductId }, new { @class = "btn btn-primary m-2" })
+            </div>
+        </div>
+    }
+    }
